@@ -24,7 +24,7 @@ INSERT INTO family VALUES (3, "Pumpkin", NULL, NULL);
 SELECT * FROM family;
 
 UPDATE friends
-SET name = ayse
+SET name = "Jacela"
 WHERE id = 1;
 
 CREATE TABLE messages (
