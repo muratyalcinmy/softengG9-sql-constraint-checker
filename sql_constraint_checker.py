@@ -1,54 +1,107 @@
 from typing import NamedTuple
-import re
-
-CONSTRAINTS = [
-	"NOT NULL",
-	"UNIQUE",
-	"PRIMARY KEY",
-	"FOREIGN KEY",
-	"CHECK",
-	"DEFAULT",
-	"INDEX"
-]
 
 
-class TableConstraints(NamedTuple):
-	table_name: str
-	constraint: dict
+class SQLParse:
+	def __init__(self, filename_sql):
+		self.text = self.read_as_text(filename_sql).upper()
+
+	def find_keyword_blocks(self, keyword_name: str) -> [str]:
+		detect_bgn = self.text.split(keyword_name)[1:]
+		parsed_blocks = []
+		for each in detect_bgn:
+			detect_end = each.split(';')[0]
+			purify_spc = ' '.join(detect_end.split())
+			parsed_blocks.append(purify_spc)
+		return parsed_blocks
+
+	@staticmethod
+	def read_as_list(file_path) -> list:
+		with open(file_path, 'r') as f:
+			return f.read().split()
+
+	@staticmethod
+	def read_as_text(file_path) -> str:
+		with open(file_path, 'r') as f:
+			return f.read().replace('\n', ' ')
 
 
-def read_sql_file(file_path) -> str:
-	with open(file_path, 'r') as file:
-		sql_file = file.read().replace("\n", " ")
-	return sql_file
+class TableParse(SQLParse):
+	class TableConstraints(NamedTuple):
+		table_name: str
+		constraint: dict
+
+		def __repr__(self):
+			out = '* TABLE NAME:\n{}\n* CONSTRAINT:'.format(self.table_name)
+			for key, val in self.constraint.items():
+				out += '\n' + key + ' ' + val
+			return out
+
+	def __init__(self, filename_sql, filename_constraints, filename_data_types):
+		super(TableParse, self).__init__(filename_sql)
+		self.__constraints = self.read_as_list(filename_constraints)
+		self.__data_types = self.read_as_list(filename_data_types)
+
+	def parse(self):
+		return [self.__create_table_parser(block) for block in self.find_keyword_blocks('CREATE TABLE')]
+
+	def __create_table_parser(self, block: str) -> TableConstraints:
+		name_idx = block.find(' ')
+		name_str = block[:name_idx]
+		body_idx = block.find('(')
+		body_str = block[body_idx+1:-1]
+		constraints = {}
+		for line in body_str.split(','):
+			col_part = ''.join(s for s in line if s.isalpha() or s.isspace()).split()
+			col_name = ' '.join([s for s in col_part if s not in self.__constraints and s not in self.__data_types])
+			col_cons = ' '.join([s for s in col_part if s in self.__constraints])
+			if col_name in constraints:
+				constraints[col_name] += ' ' + col_cons
+			else:
+				constraints[col_name] = col_cons
+		return self.TableConstraints(name_str, constraints)
 
 
-def find_keyword_blocks(keyword_name: str, txt: str) -> list:
-	parsed = txt.split(keyword_name)
-	return [" ".join(p.split(";")[0].split()) for p in parsed[1:]]
+class TableCheck:
+	def __init__(self, filename_sql_old, filename_sql_new, filename_constraints, filename_data_types):
+		self.__table_old = TableParse(filename_sql_old, filename_constraints, filename_data_types).parse()
+		self.__table_new = TableParse(filename_sql_new, filename_constraints, filename_data_types).parse()
+		self.__check_new = []
+		self.__check_err = []
+		self.output = self.__check_diff()
 
+	def diff(self):
+		if self.output:
+			print('-----> ALLOWED!')
+			for each in self.__check_new:
+				print('-----> ADDED:')
+				print(each)
+		else:
+			print('-----> NOT ALLOWED!')
+			for each in self.__check_err:
+				print('-----> ERROR:')
+				print(each)
+		return self.output
 
-def create_table_parser(ct_block: str) -> TableConstraints:
-	table_name = ct_block.split()[0]
-	constraint = {}
-	idx = ct_block.index("(")
-	parsed = ct_block[idx+1:-1]
-	for p in parsed.split(","):
-		val = [word for word in CONSTRAINTS if word in p.upper()]
-		constraint[p.split()[0]] = val
-	return TableConstraints(table_name, constraint)
-
-
-def check_diff(old_file: TableConstraints, new_file: TableConstraints) -> bool:
-	pass
+	def __check_diff(self) -> bool:
+		for new in self.__table_new:
+			try:
+				old = next(old for old in self.__table_old if old.table_name == new.table_name)
+				for new_col_name, old_col_name in zip(new.constraint, old.constraint):
+					if new_col_name == old_col_name:
+						if new.constraint[new_col_name] != old.constraint[old_col_name]:
+							tbl = 'TABLE NAME: {}\n'.format(new.table_name)
+							col = 'COLUMN NAME: {}\n'.format(new_col_name)
+							dif = 'DIFFERENCE: \"{}\" != \"{}\"'.format(new.constraint[new_col_name],
+																		old.constraint[old_col_name])
+							self.__check_err.append(tbl + col + dif)
+			except StopIteration:
+				self.__check_new.append(new)
+		return False if self.__check_err else True
 
 
 def main():
-	file = read_sql_file("difference1-test.sql")
-	ct_block_list = find_keyword_blocks("CREATE TABLE", file)
-	for ct_block in ct_block_list:
-		print(create_table_parser(ct_block))
+	TableCheck('difference1-test.sql', 'difference2-test.sql', 'constraints.txt', 'data_types.txt').diff()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
