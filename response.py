@@ -12,7 +12,7 @@ def main():
 		"$schema": "http://json-schema.org/draft-04/schema#",
        		"title": "Response information for SQL constraint checking process",
      		"type": "object",
-       		"description": "If constraints are proper returns true(1) else false(0)",
+       		"description": "If constraints are proper failure = false(0) else true(1)",
        		"properties": {
        		"failure": {"type": "bool"},
        		},
