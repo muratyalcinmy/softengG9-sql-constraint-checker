@@ -10,6 +10,7 @@ def read_as_text(file_path) -> str:
 
 data = dict()
 data['name'] = 'difference'
+data['reminder'] = 'reminder'
 data['old'] = b64encode(bytes(read_as_text('difference1-test.sql'), 'utf-8')).decode('utf-8')
 data['new'] = b64encode(bytes(read_as_text('difference2-test.sql'), 'utf-8')).decode('utf-8')
 
