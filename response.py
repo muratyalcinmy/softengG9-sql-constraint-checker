@@ -1,4 +1,5 @@
 import requests, sys, json  #import main Flask class and request object
+from sql_constraint_checker import TableCheck
 
 def main():
 
@@ -17,22 +18,19 @@ def main():
        		},
       		"required": "failure" 
 	       }
+	
+	sql_constaint_check=TableCheck(sys.argv[1], sys.argv[2], 'constraints.txt', 'data_types.txt')
+	
+	if(sql_constaint_check==False):
+	    data["properties"]= " 'properties': {'failure': True }"
+	else:
+	     data["properties"]= " 'properties': {'failure': False }"
+	
+	dataJson = json.dumps(data)
 
-	constraint_checker_func(sys.argv[1], sys.argv[2])
-
-	r = requests.get(url = "http://localhost:5000/post", json = data) 
-
+	r = requests.get(url = "http://localhost:8081/post", dataJson = dataJson) 
+	#r = requests.post(url = 'http://localhost:8081', dataJson = dataJson)
 	print (r)
-
-def constraint_checker_func(file1, file2):
-
-	F = open(file1,"r") 
-	
-	print (F.read()) 
-
-	F2 = open(file2,"r") 
-	
-	print (F2.read()) 
 
 
 if __name__ == '__main__':
