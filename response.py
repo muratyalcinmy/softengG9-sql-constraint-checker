@@ -7,7 +7,16 @@ def main():
 		sys.exit (1)
 	
 
-	data = {"name" : "Burak", "age" : "35" } 
+	data = {  
+		"$schema": "http://json-schema.org/draft-04/schema#",
+       		"title": "Response information for SQL constraint checking process",
+     		"type": "object",
+       		"description": "If constraints are proper returns true(1) else false(0)",
+       		"properties": {
+       		"failure": {"type": "bool"},
+       		},
+      		"required": "failure" 
+	       }
 
 	constraint_checker_func(sys.argv[1], sys.argv[2])
 
