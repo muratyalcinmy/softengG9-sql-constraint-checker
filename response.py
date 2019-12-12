@@ -16,7 +16,8 @@ def main():
        		"properties": {
        		"failure": {"type": "bool"},
        		},
-      		"required": "failure" 
+      		"required": "failure",
+		"destination":8
 	       }
 	
 	sql_constraint_check=TableCheck(sys.argv[1], sys.argv[2], 'constraints.txt', 'data_types.txt')
