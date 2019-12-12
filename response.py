@@ -28,8 +28,8 @@ def main():
 	
 	dataJson = json.dumps(data)
 
-	r = requests.get(url = "http://localhost:8081/post", dataJson = dataJson) 
-	#r = requests.post(url = 'http://localhost:8081', dataJson = dataJson)
+	#r = requests.get(url = "http://localhost:8081/post", dataJson = dataJson) 
+	r = requests.post(url = 'http://localhost:8081', dataJson = dataJson)
 	print (r)
 
 
