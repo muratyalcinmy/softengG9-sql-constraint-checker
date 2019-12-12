@@ -19,9 +19,9 @@ def main():
       		"required": "failure" 
 	       }
 	
-	sql_constaint_check=TableCheck(sys.argv[1], sys.argv[2], 'constraints.txt', 'data_types.txt')
+	sql_constraint_check=TableCheck(sys.argv[1], sys.argv[2], 'constraints.txt', 'data_types.txt')
 	
-	if(sql_constaint_check==False):
+	if(sql_constraint_check==False):
 	    data["properties"]= " 'properties': {'failure': True }"
 	else:
 	     data["properties"]= " 'properties': {'failure': False }"
