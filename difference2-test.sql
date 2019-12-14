@@ -1,7 +1,6 @@
 CREATE TABLE friends (
     id INT PRIMARY KEY,
     name TEXT,
-    age INT,
     weight FLOAT);
 
 INSERT INTO friends VALUES (1, "Jacela", 32, 165.5);
