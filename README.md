@@ -2,14 +2,14 @@
 
 ### Prerequisites
 ```
-Python 3.7
+Python 2.7
 
 Built-in packages:
     os
     json
     logging
     base64
-    typing
+    collections
 
 Additional packages:
     requests
@@ -23,6 +23,8 @@ Additional packages:
 
 ### Install
 ```
+conda create -n yourenvname python=2.7
+activate yourenvname
 conda install -c anaconda requests
 ```
 

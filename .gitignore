@@ -1,3 +1,4 @@
 /.idea
+/*.pyc
 /__pycache__
 sql_constraint_checker_log.txt
